@@ -1,0 +1,26 @@
+alias memlist {
+	local('$barch $handle $data $args $pid');
+
+	# figure out the arch of this session
+	$barch = barch($1);
+
+	$pid = $2;
+
+	# read in the right BOF file
+	$handle = openf(script_resource("memlist. $+ $barch $+ .o"));
+	$data   = readb($handle, -1);
+	closef($handle);
+
+	# pack the arguments
+	$args = bof_pack($1, "i", $pid);
+
+	btask($1, "Running memlist BOF");
+
+	# run it.. 
+	beacon_inline_execute($1, $data, "go", $args);
+}
+
+beacon_command_register(
+	"memlist", 
+	"List loaded modules in the memory of any process", 
+	"Synopsis: memlist\n\Listing modules in memory.");
